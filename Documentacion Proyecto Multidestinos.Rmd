@@ -1,0 +1,93 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+yaml
+
+---
+title: "Documentacion Proyecto Multidestinos"
+output: pdf_document
+---
+
+## 1. Descripción del proyecto
+
+Este proyecto consiste en el desarrollo de una solución automatizada para la agencia de viajes *Multidestinos*. El objetivo es gestionar el control de ventas, cálculo de comisiones, y visualización de utilidades mediante una aplicación desarrollada en Shiny. Esta app será alimentada con información que los mismos ejecutivos registrarán de forma directa, evitando el uso de hojas de cálculo separadas.
+
+## 2. Diagrama de flujo
+
+A continuación se presenta el flujo de trabajo del sistema:
+
+```{r fig.align="center", echo=FALSE, out.width="80%"}
+knitr::include_graphics("flujo.png")
+```
+
+## 3. Documentación del desarrollo
+
+Esta sección detalla el trabajo realizado, desde la carga de los datos hasta la preparación del producto mínimo viable (MVP).
+
+### 3.1. Carga y exploración de los datos
+
+Se utilizó un archivo `.xlsx` que contiene información de las ventas realizadas por los ejecutivos. Se cargó con el paquete `readxl`:
+
+```{r message=FALSE, warning=FALSE}
+library(readxl)
+ventas <- read_excel("ventas_expa.xlsx")
+```
+
+### 3.2. Limpieza y transformación
+
+Se eliminaron los símbolos `$` y puntos de miles del archivo Excel original para facilitar el análisis. Además, se aplicaron transformaciones con `dplyr`:
+
+```{r}
+library(dplyr)
+
+ventas <- ventas %>%
+  mutate(
+    Comision_total = total_pago_cliente - (costo_hotel_neto + costo_vuelo_neto + costo_seguro_neto + costo_excursion_neto),
+    Comision_ejecutivo = Comision_total * 0.5,
+    Comision_agencia = Comision_total * 0.5,
+    Utilidad = Comision_agencia,
+    Estado_programa = "Pendiente"
+  )
+```
+
+Esta transformación permite calcular la utilidad y las comisiones de forma automatizada, minimizando errores.
+
+### 3.3. Herramientas de documentación y visualización
+
+Para documentar el desarrollo del proyecto, se integraron herramientas propias del entorno de RStudio junto con recursos visuales que permiten representar de manera clara el proceso automatizado implementado.
+
+Se utilizó `RMarkdown` para generar este informe reproducible, facilitando la trazabilidad del código, las transformaciones de datos y los resultados obtenidos. Además, se incorporó un diagrama de flujo creado con una herramienta externa y embebido previamente en el documento.
+
+También se incluyó una Model Card adaptada al contexto de Vetiver, que resume los detalles del modelo de negocio, su uso, los datos procesados y consideraciones éticas:
+
+```yaml
+model_card:
+  model_details:
+    developer: "Alejandra Robles"
+    version: "MVP v1"
+    description: "Este proyecto automatiza el cálculo de comisiones y utilidades para la agencia Multidestinos."
+  intended_use:
+    primary_uses: 
+      - "Control de comisiones"
+      - "Gestión de utilidad por venta"
+    primary_users:
+      - "Ejecutivos de ventas"
+      - "Encargados financieros"
+  data:
+    input_data: 
+      - "Archivo Excel con registros de ventas"
+    data_cleaning:
+      - "Remoción de símbolos en Excel"
+      - "Conversión a variables numéricas en R"
+  metrics:
+    - "Cálculo automatizado de utilidad y comisiones"
+  ethical_considerations:
+    - "Privacidad de datos de clientes"
+  caveats_recommendations:
+    - "La app aún está en fase MVP"
+    
+```
+
+
